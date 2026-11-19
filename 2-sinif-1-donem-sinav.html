@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2. Sınıf 1. Dönem Tüm Dersler Sınavı</title>
+<style>
+  :root {
+    --bg: #f3f6fc;
+    --card: #ffffff;
+    --text: #1b2432;
+    --muted: #5c687a;
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --success: #16a34a;
+    --success-bg: #dcfce7;
+    --danger: #dc2626;
+    --danger-bg: #fee2e2;
+    --border: #e2e8f0;
+    --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #eef4ff 0%, #f8fafc 55%, #fff7ed 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 48px;
+  }
+  #fx-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 18px 16px 0;
+    position: relative;
+    z-index: 2;
+  }
+  .top-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--primary-dark);
+  }
+  .brand p {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .pill {
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .pill.good { background: var(--success-bg); color: var(--success); border-color: #bbf7d0; }
+  .pill.bad { background: var(--danger-bg); color: var(--danger); border-color: #fecaca; }
+  .pill.streak { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 13px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-soft { background: #eef2ff; color: var(--primary-dark); }
+  .btn-soft:hover { background: #e0e7ff; }
+  .btn-warn { background: #fef3c7; color: #92400e; }
+  .btn-warn:hover { background: #fde68a; }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .tab {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.86rem;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .map-panel {
+    display: none;
+    margin-top: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+  }
+  .map-panel.open { display: block; }
+  .map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .map-btn {
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #f8fafc;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .map-btn.current { outline: 2px solid var(--primary); }
+  .map-btn.correct { background: var(--success-bg); color: var(--success); border-color: #86efac; }
+  .map-btn.wrong { background: var(--danger-bg); color: var(--danger); border-color: #fca5a5; }
+
+  .question-card {
+    margin-top: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .q-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 0.84rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .q-subject {
+    background: #eff6ff;
+    color: var(--primary-dark);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .q-text {
+    font-size: 1.18rem;
+    line-height: 1.5;
+    margin: 8px 0 18px;
+    font-weight: 700;
+  }
+  .options {
+    display: grid;
+    gap: 10px;
+  }
+  .opt-btn {
+    width: 100%;
+    text-align: left;
+    padding: 13px 16px;
+    border-radius: 13px;
+    border: 2px solid var(--border);
+    background: #f8fafc;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.14s ease;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: #eff6ff;
+  }
+  .opt-btn.correct {
+    background: var(--success-bg);
+    border-color: var(--success);
+    color: #14532d;
+  }
+  .opt-btn.wrong {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+    color: #7f1d1d;
+    animation: shake 0.35s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-4px); }
+  }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    font-weight: 600;
+  }
+  .feedback.show { display: flex; }
+  .feedback.good {
+    background: var(--success-bg);
+    color: #14532d;
+    border: 1px solid #86efac;
+  }
+  .feedback.bad {
+    background: var(--danger-bg);
+    color: #7f1d1d;
+    border: 1px solid #fca5a5;
+  }
+  .troll-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .troll-face {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #fde047;
+    border: 3px solid #ca8a04;
+    display: grid;
+    place-items: center;
+    font-size: 1.7rem;
+    animation: laughBounce 0.45s infinite alternate;
+  }
+  .haha-bubble {
+    background: #111827;
+    color: #fde047;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+    transform: rotate(-3deg);
+  }
+  @keyframes laughBounce {
+    from { transform: translateY(0) rotate(-4deg); }
+    to { transform: translateY(-5px) rotate(5deg); }
+  }
+
+  .nav-row {
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .summary-card {
+    margin-top: 16px;
+    background: var(--card);
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: none;
+  }
+  .summary-card.show { display: block; }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .sum-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+<canvas id="fx-canvas"></canvas>
+
+<div class="container">
+  <div class="top-bar">
+    <div class="brand">
+      <h1>2. Sınıf 1. Dönem Tüm Dersler Sınavı</h1>
+      <p>Türkçe • Matematik • Hayat Bilgisi • İngilizce</p>
+    </div>
+    <div class="stats">
+      <span class="pill" id="round-pill">Tur: 1</span>
+      <span class="pill" id="pool-pill">Havuz: 1000 / 1000 Kalan</span>
+      <span class="pill good" id="correct-pill">Doğru: 0</span>
+      <span class="pill bad" id="wrong-pill">Yanlış: 0</span>
+      <span class="pill streak" id="streak-pill">Seri: 0</span>
+      <button class="btn btn-soft" id="toggle-map-btn" type="button">1-100 Harita</button>
+      <button class="btn btn-soft" id="sound-btn" type="button">Ses: Açık</button>
+      <button class="btn btn-primary" id="new-round-btn" type="button">Yeni 100 Soru</button>
+      <button class="btn btn-warn" id="reset-pool-btn" type="button">Havuzu Sıfırla</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-filter="ALL" type="button">Tümü (100)</button>
+    <button class="tab" data-filter="Türkçe" type="button">Türkçe</button>
+    <button class="tab" data-filter="Matematik" type="button">Matematik</button>
+    <button class="tab" data-filter="Hayat Bilgisi" type="button">Hayat Bilgisi</button>
+    <button class="tab" data-filter="İngilizce" type="button">İngilizce</button>
+  </div>
+
+  <div class="map-panel" id="map-panel">
+    <strong>Soru Haritası</strong>
+    <div class="map-grid" id="map-grid"></div>
+  </div>
+
+  <div class="question-card" id="question-card">
+    <div class="q-meta">
+      <span class="q-subject" id="q-subject">Ders</span>
+      <span id="q-counter">Soru 1 / 100</span>
+    </div>
+    <div class="q-text" id="q-text">Soru yükleniyor...</div>
+    <div class="options" id="options"></div>
+
+    <div class="feedback" id="feedback">
+      <div class="troll-box" id="troll-box" style="display:none;">
+        <div class="troll-face">😈</div>
+        <div class="haha-bubble">HAHAHA!</div>
+      </div>
+      <div id="feedback-text"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-soft" id="prev-btn" type="button">← Önceki Soru</button>
+      <button class="btn btn-primary" id="next-btn" type="button">Sonraki Soru →</button>
+    </div>
+  </div>
+
+  <div class="summary-card" id="summary-card">
+    <h2>Tur Sonuç Özeti</h2>
+    <p id="summary-headline"></p>
+    <div class="summary-grid" id="summary-grid"></div>
+    <button class="btn btn-primary" id="summary-next-btn" type="button">Sonraki 100 Farklı Soruya Geç</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = "sinav_2_sinif_1000_havuz_v3";
+
+  function buildPool() {
+    const pool = [];
+    let idCounter = 1;
+    const addQ = (subject, q, options, ans, exp) => {
+      pool.push({ id: idCounter++, subject, q, options, ans, exp });
+    };
+
+    const alphaGroups = [
+      ["Kalem", "Kitap", "Kedi"],
+      ["Elma", "Ev", "Etek"],
+      ["Masa", "Mavi", "Mum"],
+      ["Balık", "Bebek", "Bulut"],
+      ["Sarı", "Saat", "Süt"],
+      ["Top", "Tilki", "Tuz"],
+      ["Nar", "Nehir", "Nur"],
+      ["Güneş", "Gemi", "Göz"]
+    ];
+    for (let i = 0; i < 65; i++) {
+      const grp = alphaGroups[i % alphaGroups.length];
+      const sorted = [...grp].sort((a, b) => a.localeCompare(b, "tr"));
+      const askFirst = i % 2 === 0;
+      const target = askFirst ? sorted[0] : sorted[2];
+      addQ(
+        "Türkçe",
+        askFirst
+          ? `Alfabe sırasına göre "${grp.join(", ")}" sözcüklerinden hangisi EN ÖNCE gelir? (${i + 1})`
+          : `Alfabe sırasına göre "${grp.join(", ")}" sözcüklerinden hangisi EN SON gelir? (${i + 1})`,
+        grp,
+        grp.indexOf(target),
+        `Sözlük sırası: ${sorted.join(" < ")}. Doğru yanıt "${target}".`
+      );
+    }
+
+    const zitPairs = [
+      ["Çalışkan", "Tembel", ["Gayretli", "Hızlı"]],
+      ["Büyük", "Küçük", ["Geniş", "Uzun"]],
+      ["Açık", "Kapalı", ["Aydınlık", "Temiz"]],
+      ["Sıcak", "Soğuk", ["Ilık", "Ateşli"]],
+      ["Gece", "Gündüz", ["Akşam", "Sabah"]],
+      ["İleri", "Geri", ["Ön", "Yukarı"]],
+      ["Ağır", "Hafif", ["Kalın", "Sert"]],
+      ["Uzun", "Kısa", ["Yüksek", "Büyük"]],
+      ["Giriş", "Çıkış", ["Kapı", "Salon"]],
+      ["Doğru", "Yanlış", ["Gerçek", "Tam"]]
+    ];
+    for (let i = 0; i < 65; i++) {
+      const pair = zitPairs[i % zitPairs.length];
+      addQ(
+        "Türkçe",
+        `"${pair[0]}" sözcüğünün zıt (karşıt) anlamlısı hangisidir? (${i + 1})`,
+        [pair[2][0], pair[1], pair[2][1]],
+        1,
+        `"${pair[0]}" sözcüğünün zıt anlamlısı "${pair[1]}" sözcüğüdür.`
+      );
+    }
+
+    const heceItems = [
+      ["bil-gi-sa-yar", ["bilgi-sa-yar", "bil-gi-sayar"], "bilgisayar"],
+      ["öğ-ret-men", ["öğret-men", "öğ-ret-me-n"], "öğretmen"],
+      ["ka-lem-lik", ["kalem-lik", "ka-lemlik"], "kalemlik"],
+      ["ki-tap-lık", ["kitap-lık", "ki-taplık"], "kitaplık"],
+      ["pen-ce-re", ["pence-re", "pen-cere"], "pencere"],
+      ["te-le-fon", ["tele-fon", "te-lefon"], "telefon"]
+    ];
+    for (let i = 0; i < 60; i++) {
+      const item = heceItems[i % heceItems.length];
+      addQ(
+        "Türkçe",
+        `"${item[2]}" sözcüğünün doğru hecelerine ayrılmış hali hangisidir? (${i + 1})`,
+        [item[1][0], item[0], item[1][1]],
+        1,
+        `Doğru hecelenmiş hali: ${item[0]}.`
+      );
+    }
+
+    const noktaItems = [
+      ["Senin adın ne", "Bugün hava çok güzel.", "Ayşe eve geldi."],
+      ["Nereden geliyorsun", "Ali kitap okuyor.", "Kediler süt içer."],
+      ["Saat kaç oldu", "Okul erken bitti.", "Annem yemek yaptı."],
+      ["Hangi sınıftasın", "Bahçede oyun oynadık.", "Kuşlar uçuyor."]
+    ];
+    for (let i = 0; i < 60; i++) {
+      const nItem = noktaItems[i % noktaItems.length];
+      addQ(
+        "Türkçe",
+        `Hangisinin sonuna nokta (.) konulması YANLIŞTIR? (${i + 1})`,
+        [nItem[1], nItem[0], nItem[2]],
+        1,
+        `"${nItem[0]}?" bir soru cümlesidir, sonuna soru işareti (?) konur.`
+      );
+    }
+
+    for (let i = 0; i < 80; i++) {
+      const a = 12 + (i % 45);
+      const b = 11 + ((i * 3) % 38);
+      const sum = a + b;
+      addQ(
+        "Matematik",
+        `${a} + ${b} işleminin sonucu kaçtır?`,
+        [String(sum - 2), String(sum), String(sum + 3)],
+        1,
+        `${a} + ${b} = ${sum}.`
+      );
+    }
+
+    for (let i = 0; i < 80; i++) {
+      const big = 50 + (i % 45);
+      const small = 10 + ((i * 2) % 30);
+      const diff = big - small;
+      addQ(
+        "Matematik",
+        `${big} - ${small} işleminin sonucu kaçtır?`,
+        [String(diff), String(diff + 4), String(Math.max(1, diff - 3))],
+        0,
+        `${big} - ${small} = ${diff}.`
+      );
+    }
+
+    for (let i = 0; i < 90; i++) {
+      const tens = 2 + (i % 7);
+      const ones = (i * 3) % 9;
+      const num = tens * 10 + ones;
+      const mode = i % 3;
+      if (mode === 0) {
+        addQ(
+          "Matematik",
+          `"${num}" sayısında onlar basamağındaki rakam hangisidir?`,
+          [String(ones), String(tens), String((tens + 1) % 10)],
+          1,
+          `${num} sayısında ${tens} onluk ve ${ones} birlik vardır.`
+        );
+      } else if (mode === 1) {
+        addQ(
+          "Matematik",
+          `"${num}" sayısının rakamları toplamı kaçtır?`,
+          [String(tens + ones), String(tens + ones + 2), String(Math.max(1, tens + ones - 1))],
+          0,
+          `${tens} + ${ones} = ${tens + ones}.`
+        );
+      } else {
+        const step = i % 2 === 0 ? 3 : 5;
+        const start = step * 2;
+        const seq = [start, start + step, start + step * 2, start + step * 3];
+        addQ(
+          "Matematik",
+          `${step}'er ileri ritmik saymada "${seq[0]}, ${seq[1]}, ${seq[2]}, ..." sırasındaki sonraki sayı hangisidir?`,
+          [String(seq[3] - 1), String(seq[3]), String(seq[3] + step)],
+          1,
+          `Sıradaki sayı ${seq[3]}'tür.`
+        );
+      }
+    }
+
+    const hbSet = [
+      ["Okul kurallarına uymanın temel amacı nedir?", "Güvenli ve düzenli ortam sağlamak", "Teneffüsleri kısaltmak", "Ödev yapmamak", "Kurallar okulda düzen ve güvenlik sağlar."],
+      ["Hangisi kişisel temizlik alışkanlığıdır?", "Yemekten önce elleri yıkamak", "Kirli kıyafetle yatmak", "Dişleri fırçalamamak", "Ellerimizi yıkamak sağlığımızı korur."],
+      ["Hangisi temel ihtiyaçlarımızdan biridir?", "Temiz su ve beslenme", "Oyun konsolu", "Renkli kalem kutusu", "Su ve beslenme yaşamsal ihtiyaçtır."],
+      ["Hangisi bir istektir (ihtiyaç değildir)?", "Yeni oyuncak araba", "İçme suyu", "Güvenli barınma", "Oyuncak bir istektir."],
+      ["Trafikte karşıdan karşıya geçerken ne yapmalıyız?", "Önce sol, sonra sağ, tekrar sol", "Koşarak karşıya geçmek", "Gözleri kapatıp yürümek", "Önce sol, sağ ve tekrar sol kontrol edilmelidir."],
+      ["Ailede iş bölümü yapmanın yararı nedir?", "İşlerin uyumlu ve hızlı bitmesi", "Kimsenin görev almaması", "Tüm işin tek kişiye kalması", "İş bölümü aile içi uyumu artırır."],
+      ["Arkadaşımızla anlaşamadığımızda en doğru davranış nedir?", "Sakin konuşup dinlemek", "Bağırıp küsmek", "Eşyalarını saklamak", "Saygılı iletişim sorunları çözer."],
+      ["Tasarruflu davranmak için hangisi doğrudur?", "Odadan çıkarken ışığı kapatmak", "Musluğu açık bırakmak", "Yemeği tabakta bırakmak", "Elektrik ve suyu tasarruflu kullanmalıyız."]
+    ];
+    for (let i = 0; i < 250; i++) {
+      const item = hbSet[i % hbSet.length];
+      addQ("Hayat Bilgisi", `${item[0]} (${i + 1})`, [item[2], item[1], item[3]], 1, item[4]);
+    }
+
+    const engSet = [
+      ["'Red' rengi Türkçede hangi renktir?", "Kırmızı", "Mavi", "Yeşil", "'Red' = Kırmızı."],
+      ["'Blue' rengi Türkçede hangi renktir?", "Mavi", "Sarı", "Mor", "'Blue' = Mavi."],
+      ["'Green' rengi Türkçede hangi renktir?", "Yeşil", "Siyah", "Turuncu", "'Green' = Yeşil."],
+      ["'Yellow' rengi Türkçede hangi renktir?", "Sarı", "Beyaz", "Pembe", "'Yellow' = Sarı."],
+      ["'Book' kelimesinin Türkçe karşılığı nedir?", "Kitap", "Kalem", "Silgi", "'Book' = Kitap."],
+      ["'Pencil' kelimesinin Türkçe karşılığı nedir?", "Kurşun kalem", "Masa", "Sandalye", "'Pencil' = Kurşun kalem."],
+      ["'Hello!' ifadesi ne anlama gelir?", "Merhaba!", "Güle güle!", "İyi geceler!", "'Hello!' = Merhaba!"],
+      ["'Goodbye!' ifadesi ne anlama gelir?", "Hoşça kal / Güle güle", "Günaydın", "Lütfen", "'Goodbye!' = Hoşça kal / Güle güle."],
+      ["'One' sayısı kaçtır?", "1", "2", "5", "'One' = 1."],
+      ["'Three' sayısı kaçtır?", "3", "7", "10", "'Three' = 3."]
+    ];
+    for (let i = 0; i < 250; i++) {
+      const item = engSet[i % engSet.length];
+      addQ("İngilizce", `${item[0]} (${i + 1})`, [item[2], item[1], item[3]], 1, item[4]);
+    }
+
+    return pool.slice(0, 1000);
+  }
+
+  const POOL = buildPool();
+
+  function loadState() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (raw && Array.isArray(raw.usedIds)) return raw;
+    } catch (e) {}
+    return { usedIds: [], round: 0 };
+  }
+
+  function saveState(st) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(st)); } catch (e) {}
+  }
+
+  let state = loadState();
+  let currentQuestions = [];
+  let answers = {};
+  let activeFilter = "ALL";
+  let currentIndex = 0;
+  let streak = 0;
+  let soundOn = true;
+
+  function pickNext100() {
+    const usedSet = new Set(state.usedIds);
+    let available = POOL.filter(q => !usedSet.has(q.id));
+
+    if (available.length === 0) {
+      state.usedIds = [];
+      saveState(state);
+      available = [...POOL];
+    }
+
+    const chosen = available.slice(0, 100);
+    state.usedIds.push(...chosen.map(q => q.id));
+    state.round += 1;
+    saveState(state);
+
+    currentQuestions = chosen;
+    answers = {};
+    currentIndex = 0;
+    streak = 0;
+    document.getElementById("summary-card").classList.remove("show");
+    updateTopBar();
+    renderMap();
+    renderQuestion();
+  }
+
+  function resetPool() {
+    state = { usedIds: [], round: 0 };
+    saveState(state);
+    pickNext100();
+  }
+
+  function getFilteredQuestions() {
+    if (activeFilter === "ALL") return currentQuestions;
+    return currentQuestions.filter(q => q.subject === activeFilter);
+  }
+
+  function updateTopBar() {
+    const remaining = POOL.length - state.usedIds.length;
+    const ansVals = Object.values(answers);
+    const corr = ansVals.filter(a => a.isCorrect).length;
+    const wrong = ansVals.filter(a => !a.isCorrect).length;
+
+    document.getElementById("round-pill").textContent = `Tur: ${state.round}`;
+    document.getElementById("pool-pill").textContent = `Havuz: ${remaining} / ${POOL.length} Kalan`;
+    document.getElementById("correct-pill").textContent = `Doğru: ${corr}`;
+    document.getElementById("wrong-pill").textContent = `Yanlış: ${wrong}`;
+    document.getElementById("streak-pill").textContent = `Seri: ${streak}`;
+  }
+
+  function renderMap() {
+    const list = getFilteredQuestions();
+    const grid = document.getElementById("map-grid");
+    grid.innerHTML = "";
+    list.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "map-btn";
+      btn.textContent = String(idx + 1);
+      if (idx === currentIndex) btn.classList.add("current");
+      if (answers[q.id]) {
+        btn.classList.add(answers[q.id].isCorrect ? "correct" : "wrong");
+      }
+      btn.addEventListener("click", () => {
+        currentIndex = idx;
+        renderQuestion();
+        renderMap();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function renderQuestion() {
+    const list = getFilteredQuestions();
+    if (!list.length) return;
+    if (currentIndex >= list.length) currentIndex = 0;
+
+    const q = list[currentIndex];
+    const saved = answers[q.id];
+
+    document.getElementById("q-subject").textContent = q.subject;
+    document.getElementById("q-counter").textContent = `Soru ${currentIndex + 1} / ${list.length}`;
+    document.getElementById("q-text").textContent = q.q;
+
+    const optsEl = document.getElementById("options");
+    optsEl.innerHTML = "";
+    const letters = ["A", "B", "C", "D"];
+
+    q.options.forEach((optText, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "opt-btn";
+      btn.textContent = `${letters[idx]}) ${optText}`;
+      if (saved) {
+        btn.disabled = true;
+        if (idx === q.ans) btn.classList.add("correct");
+        if (idx === saved.chosenIndex && !saved.isCorrect) btn.classList.add("wrong");
+      }
+      btn.addEventListener("click", () => handleAnswer(q, idx));
+      optsEl.appendChild(btn);
+    });
+
+    const fb = document.getElementById("feedback");
+    const fbText = document.getElementById("feedback-text");
+    const trollBox = document.getElementById("troll-box");
+
+    if (saved) {
+      fb.className = "feedback show " + (saved.isCorrect ? "good" : "bad");
+      trollBox.style.display = saved.isCorrect ? "none" : "flex";
+      fbText.textContent = saved.isCorrect
+        ? `Harika, doğru! ${q.exp}`
+        : `Yanlış! Doğru şık: ${letters[q.ans]}) ${q.options[q.ans]}. ${q.exp}`;
+    } else {
+      fb.className = "feedback";
+      trollBox.style.display = "none";
+      fbText.textContent = "";
+    }
+  }
+
+  function handleAnswer(q, chosenIndex) {
+    if (answers[q.id]) return;
+    const isCorrect = chosenIndex === q.ans;
+    answers[q.id] = { chosenIndex, isCorrect };
+
+    if (isCorrect) {
+      streak += 1;
+      spawnFireworks();
+      playFanfare();
+    } else {
+      streak = 0;
+      playHahaLaugh();
+    }
+
+    updateTopBar();
+    renderMap();
+    renderQuestion();
+
+    if (Object.keys(answers).length === currentQuestions.length) {
+      showSummary();
+    }
+  }
+
+  function showSummary() {
+    const subjects = ["Türkçe", "Matematik", "Hayat Bilgisi", "İngilizce"];
+    const grid = document.getElementById("summary-grid");
+    grid.innerHTML = "";
+
+    let totalCorr = 0;
+    subjects.forEach(sub => {
+      const subQs = currentQuestions.filter(q => q.subject === sub);
+      const subCorr = subQs.filter(q => answers[q.id] && answers[q.id].isCorrect).length;
+      totalCorr += subCorr;
+      const box = document.createElement("div");
+      box.className = "sum-box";
+      box.textContent = `${sub}: ${subCorr} / ${subQs.length} Doğru`;
+      grid.appendChild(box);
+    });
+
+    document.getElementById("summary-headline").textContent =
+      `Bu turda 100 sorudan ${totalCorr} doğru yaptın!`;
+    document.getElementById("summary-card").classList.add("show");
+  }
+
+  const canvas = document.getElementById("fx-canvas");
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function spawnFireworks() {
+    const colors = ["#ef4444", "#22c55e", "#3b82f6", "#f59e0b", "#ec4899", "#a855f7"];
+    const cx = window.innerWidth * (0.25 + Math.random() * 0.5);
+    const cy = window.innerHeight * (0.2 + Math.random() * 0.35);
+    for (let i = 0; i < 48; i++) {
+      const angle = (Math.PI * 2 * i) / 48;
+      const speed = 2 + Math.random() * 5.5;
+      particles.push({
+        x: cx,
+        y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        alpha: 1,
+        color: colors[i % colors.length],
+        size: 3 + Math.random() * 3
+      });
+    }
+  }
+
+  function tickParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter(p => p.alpha > 0.02);
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.09;
+      p.alpha -= 0.018;
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tickParticles);
+  }
+  tickParticles();
+
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) audioCtx = new Ctx();
+    }
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playFanfare() {
+    if (!soundOn) return;
+    const ac = getAudioCtx();
+    if (!ac) return;
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, idx) => {
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      const start = ac.currentTime + idx * 0.08;
+      gain.gain.setValueAtTime(0.14, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start(start);
+      osc.stop(start + 0.23);
+    });
+  }
+
+  function playHahaLaugh() {
+    if (!soundOn) return;
+    const ac = getAudioCtx();
+    if (!ac) return;
+    const laughs = [430, 390, 460, 360];
+    laughs.forEach((freq, idx) => {
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = "sawtooth";
+      const start = ac.currentTime + idx * 0.12;
+      osc.frequency.setValueAtTime(freq, start);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.72, start + 0.1);
+      gain.gain.setValueAtTime(0.12, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.11);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start(start);
+      osc.stop(start + 0.12);
+    });
+  }
+
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeFilter = tab.dataset.filter;
+      currentIndex = 0;
+      renderMap();
+      renderQuestion();
+    });
+  });
+
+  document.getElementById("toggle-map-btn").addEventListener("click", () => {
+    document.getElementById("map-panel").classList.toggle("open");
+  });
+
+  document.getElementById("sound-btn").addEventListener("click", () => {
+    soundOn = !soundOn;
+    document.getElementById("sound-btn").textContent = soundOn ? "Ses: Açık" : "Ses: Kapalı";
+  });
+
+  document.getElementById("new-round-btn").addEventListener("click", pickNext100);
+  document.getElementById("summary-next-btn").addEventListener("click", pickNext100);
+  document.getElementById("reset-pool-btn").addEventListener("click", resetPool);
+
+  document.getElementById("prev-btn").addEventListener("click", () => {
+    if (currentIndex > 0) {
+      currentIndex -= 1;
+      renderMap();
+      renderQuestion();
+    }
+  });
+
+  document.getElementById("next-btn").addEventListener("click", () => {
+    const list = getFilteredQuestions();
+    if (currentIndex < list.length - 1) {
+      currentIndex += 1;
+      renderMap();
+      renderQuestion();
+    }
+  });
+
+  pickNext100();
+})();
+</script>
+</body>
+</html>
